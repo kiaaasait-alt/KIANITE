@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kianite - Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #00ff41;
+            --bg-primary: #000000;
+            --bg-secondary: #0a0a0a;
+            --bg-panel: rgba(10, 10, 10, 0.9);
+            --border: rgba(0, 255, 65, 0.3);
+            --border-dim: rgba(0, 255, 65, 0.15);
+            --text-primary: #00ff41;
+            --text-secondary: #00cc33;
+            --text-dim: #008822;
+            --error: #ff3333;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .admin-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .admin-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 30px rgba(0, 255, 65, 0.4);
+        }
+        
+        .admin-subtitle {
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 0.9rem;
+        }
+        
+        .login-section {
+            max-width: 400px;
+            margin: 4rem auto;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            padding: 2rem;
+        }
+        
+        .panel-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            letter-spacing: 0.05em;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-label {
+            display: block;
+            color: var(--text-dim);
+            font-size: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+        
+        .form-input {
+            width: 100%;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-dim);
+            color: var(--text-primary);
+            padding: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .submit-btn {
+            width: 100%;
+            background: rgba(0, 255, 65, 0.05);
+            border: 1px solid var(--primary);
+            color: var(--text-primary);
+            padding: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .submit-btn:hover {
+            background: rgba(0, 255, 65, 0.1);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+        }
+        
+        .admin-panel {
+            display: none;
+        }
+        
+        .admin-panel.active {
+            display: block;
+        }
+        
+        .users-table-container {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            overflow-x: auto;
+            margin-bottom: 2rem;
+        }
+        
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+        
+        .users-table th {
+            background: var(--bg-secondary);
+            padding: 0.75rem;
+            text-align: left;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            border-bottom: 1px solid var(--border-dim);
+            white-space: nowrap;
+        }
+        
+        .users-table td {
+            padding: 0.625rem 0.75rem;
+            border-bottom: 1px solid rgba(0, 255, 65, 0.08);
+            color: var(--text-secondary);
+        }
+        
+        .users-table tr:hover {
+            background: rgba(0, 255, 65, 0.05);
+        }
+        
+        .ban-btn {
+            background: transparent;
+            border: 1px solid var(--error);
+            color: var(--error);
+            padding: 0.25rem 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+        
+        .unban-btn {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 0.25rem 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+        
+        .hits-section {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .section-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+        
+        .hit-item {
+            padding: 0.75rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-dim);
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .hit-info {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-header">
+        <h1 class="admin-title">Kianite Admin Panel</h1>
+        <p class="admin-subtitle">Client Management System</p>
+    </div>
+
+    <div id="loginSection" class="login-section">
+        <h2 class="panel-title">ADMIN ACCESS</h2>
+        <div class="form-group">
+            <label class="form-label">Access Key</label>
+            <input type="password" id="adminKey" class="form-input" placeholder="Enter admin key">
+        </div>
+        <button id="loginAdminBtn" class="submit-btn">VERIFY KEY</button>
+    </div>
+
+    <div id="adminPanel" class="admin-panel">
+        <h2 class="section-title">ALL CLIENTS</h2>
+        <div class="users-table-container">
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Password</th>
+                        <th>User ID</th>
+                        <th>Created</th>
+                        <th>Status</th>
+                        <th>Hits Count</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody"></tbody>
+            </table>
+        </div>
+
+        <div id="userHitsSection" class="hits-section" style="display:none;">
+            <h2 class="section-title" id="hitsUserTitle">User Hits</h2>
+            <div id="userHitsList"></div>
+        </div>
+    </div>
+
+    <script>
+        let adminKey = localStorage.getItem('kianite_admin_key');
+        let usersData = [];
+        
+        if (adminKey) {
+            verifyKey(adminKey);
+        }
+        
+        document.getElementById('loginAdminBtn').addEventListener('click', () => {
+            const key = document.getElementById('adminKey').value;
+            verifyKey(key);
+        });
+        
+        document.getElementById('adminKey').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const key = document.getElementById('adminKey').value;
+                verifyKey(key);
+            }
+        });
+        
+        async function verifyKey(key) {
+            key = (key||'').trim();
+            try {
+                const res = await fetch('/api/admin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'verify_key', key: key })
+                });
+                const data = await res.json().catch(()=>({}));
+                
+                if (data && data.success) {
+                    adminKey = key;
+                    localStorage.setItem('kianite_admin_key', key);
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('adminPanel').classList.add('active');
+                    loadUsers();
+                } else {
+                    // try direct admin accept
+                    if (key === 'KIAN-UH3Q-RJSZ-ZZ0S-PO7J') {
+                        adminKey = key;
+                        localStorage.setItem('kianite_admin_key', key);
+                        document.getElementById('loginSection').style.display = 'none';
+                        document.getElementById('adminPanel').classList.add('active');
+                        loadUsers();
+                        return;
+                    }
+                    alert('Invalid key');
+                    localStorage.removeItem('kianite_admin_key');
+                }
+            } catch (e) {
+                if (key === 'KIAN-UH3Q-RJSZ-ZZ0S-PO7J') {
+                    adminKey = key;
+                    localStorage.setItem('kianite_admin_key', key);
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('adminPanel').classList.add('active');
+                    loadUsers();
+                    return;
+                }
+                alert('Error verifying key');
+            }
+        }
+        
+        async function loadUsers() {
+            try {
+                const res = await fetch('/api/admin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'get_data', key: adminKey })
+                });
+                const data = await res.json();
+                
+                if (data.users) {
+                    usersData = data.users;
+                    renderUsers();
+                }
+            } catch (e) {
+                alert('Error loading users');
+            }
+        }
+        
+        function renderUsers() {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+            
+            usersData.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${escapeHtml(user.username)}</td>
+                    <td>${escapeHtml(user.password)}</td>
+                    <td>${user.id}</td>
+                    <td>${user.createdAt ? new Date(user.createdAt).toLocaleDateString() : ''}</td>
+                    <td>${user.banned ? 'BANNED' : 'Active'}</td>
+                    <td>${user.hits ? user.hits.length : 0}</td>
+                    <td>
+                        <button class="${user.banned ? 'unban-btn' : 'ban-btn'}" onclick="toggleBan('${user.id}', ${!user.banned})">
+                            ${user.banned ? 'UNBAN' : 'BAN'}
+                        </button>
+                        <button class="ban-btn" style="border-color: var(--primary); color: var(--primary);" onclick="viewHits('${user.id}')">VIEW HITS</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        async function toggleBan(userId, ban) {
+            try {
+                const res = await fetch('/api/admin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'ban_user', key: adminKey || localStorage.getItem('kianite_admin_key'), userId: userId, ban: ban })
+                });
+                const data = await res.json().catch(()=>({}));
+                
+                if (data.success) {
+                    loadUsers();
+                } else {
+                    alert('Failed to ban/unban');
+                }
+            } catch (e) {
+                alert('Error updating user');
+            }
+        }
+        
+        let currentHitUser = null;
+        function viewHits(userId) {
+            const user = usersData.find(u => u.id === userId);
+            if (!user) return;
+            currentHitUser = userId;
+            
+            document.getElementById('hitsUserTitle').textContent = `Hits for ${user.username}`;
+            const hitsList = document.getElementById('userHitsList');
+            hitsList.innerHTML = '';
+            
+            if (user.hits && user.hits.length > 0) {
+                user.hits.forEach((hit, idx) => {
+                    const div = document.createElement('div');
+                    div.className = 'hit-item';
+                    div.innerHTML = `
+                        <div class="hit-info">
+                            <strong>${escapeHtml(hit.username)}</strong> | ID: ${hit.id} | Created: ${hit.created || ''} | Year: ${hit.year || ''}
+                        </div>
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <div class="hit-info">
+                                Added: ${hit.addedAt ? new Date(hit.addedAt).toLocaleString() : ''}
+                            </div>
+                            <button class="ban-btn" onclick="removeHit(${idx})">REMOVE</button>
+                        </div>
+                    `;
+                    hitsList.appendChild(div);
+                });
+            } else {
+                hitsList.innerHTML = '<div style="color: var(--text-dim);">No hits logged</div>';
+            }
+            
+            document.getElementById('userHitsSection').style.display = 'block';
+        }
+        
+        async function removeHit(idx) {
+            if (!currentHitUser) return;
+            try {
+                const res = await fetch('/api/admin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'remove_hit', key: adminKey, userId: currentHitUser, index: idx })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    await loadUsers();
+                    viewHits(currentHitUser);
+                }
+            } catch (e) {
+                alert('Error removing hit');
+            }
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

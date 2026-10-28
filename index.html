@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kianite</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <canvas id="fx-canvas" class="fx-canvas" aria-hidden="true"></canvas>
+    <div id="bg-layer" class="bg" aria-hidden="true"></div>
+    <div class="bg-shade" aria-hidden="true"></div>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <div class="scanlines" aria-hidden="true"></div>
+    <div class="noise" aria-hidden="true"></div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-k">K</span>ianite
+            </div>
+            <div class="nav-links">
+                <button class="nav-btn active" data-tab="scanner" onclick="switchTab('scanner')">Scanner</button>
+                <button class="nav-btn" data-tab="hitlist" onclick="switchTab('hitlist')">Hit List</button>
+                <button class="nav-btn" data-tab="lookup" onclick="switchTab('lookup')">Account Lookup</button>
+                <button class="nav-btn" data-tab="credits" onclick="switchTab('credits')">Credits</button>
+            </div>
+            <div class="nav-auth">
+                <div id="authSection">
+                    <button class="auth-btn" id="loginBtn">Login</button>
+                    <button class="auth-btn primary" id="signupBtn">Sign Up</button>
+                </div>
+                <div id="userSection" style="display:none; align-items:center; gap:10px;">
+                    <span id="usernameDisplay" style="color:#00ff41;"></span>
+                    <button class="auth-btn" id="logoutBtn">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <!-- Scanner Tab -->
+        <section id="scannerTab" class="tab-content active" style="display:block;">
+            <div class="wrap">
+                <header class="hero">
+                    <h1 class="glitch" data-text="Kianite">Kianite</h1>
+                    <p class="hero-sub">roblox og username scanner</p>
+                </header>
+
+                <div class="tool">
+                    <section class="panel">
+                        <h2 class="panel-title">SCAN</h2>
+                        <div class="controls">
+                            <div class="field">
+                                <label class="field-label" for="modeSelect">MODE</label>
+                                <select id="modeSelect" name="mode">
+                                    <option value="og" selected>OG MIX</option>
+                                    <option value="lastnames">LAST NAMES</option>
+                                    <option value="swag">SWAG</option>
+                                    <option value="killer">KILLER</option>
+                                    <option value="short">SHORT</option>
+                                    <option value="aesthetic">AESTHETIC</option>
+                                    <option value="offsales">OFFSALES</option>
+                                    <option value="rap">RAP</option>
+                                </select>
+                            </div>
+
+                            <div class="field">
+                                <span class="field-label">YEAR</span>
+                                <div class="btn-group">
+                                    <button type="button" class="btn year-btn" data-min="2013" data-max="2014">2013-14</button>
+                                    <button type="button" class="btn year-btn active" data-min="2015" data-max="2017">2015-17</button>
+                                    <button type="button" class="btn year-btn" data-min="2016" data-max="2018">2016-18</button>
+                                    <button type="button" class="btn year-btn" data-min="2014" data-max="2016">2014-16</button>
+                                </div>
+                            </div>
+
+                            <div class="field actions-field">
+                                <span class="field-label">ACTIONS</span>
+                                <div class="btn-group">
+                                    <button type="button" id="startScanBtn" class="btn primary">START</button>
+                                    <button type="button" id="stopScanBtn" class="btn" disabled>STOP</button>
+                                    <button type="button" id="clearScanBtn" class="btn">CLEAR</button>
+                                    <button type="button" id="copyAllBtn" class="btn">COPY ALL</button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div id="status" class="status" role="status" aria-live="polite">
+                        <span class="status-prompt">&gt;</span>
+                        <span id="statusText">ready</span>
+                        <span id="statusStats" class="status-stats">found 0 / checked 0</span>
+                    </div>
+
+                    <div class="columns">
+                        <section class="panel results-panel">
+                            <h2 class="panel-title">RESULTS</h2>
+                            <div class="table-wrap">
+                                <table id="results-table">
+                                    <thead>
+                                        <tr>
+                                            <th>USERNAME</th>
+                                            <th>USER ID</th>
+                                            <th>CREATED</th>
+                                            <th>YEAR</th>
+                                            <th>ADD</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="resultsBody"></tbody>
+                                </table>
+                                <div id="resultsEmpty" class="empty">no results yet &mdash; press start</div>
+                            </div>
+                        </section>
+
+                        <section class="panel profile-panel">
+                            <h2 class="panel-title">PROFILE</h2>
+
+                            <div id="profileEmpty" class="empty">select a result to view profile</div>
+
+                            <div id="profileContent" hidden>
+                                <div class="profile-top">
+                                    <div class="avatar-box">
+                                        <img id="profileAvatar" alt="" hidden>
+                                        <div id="profileAvatarFallback" class="avatar-fallback" hidden>[ no avatar ]</div>
+                                    </div>
+                                    <div class="profile-heading">
+                                        <div id="profileDisplayName" class="profile-name">-</div>
+                                        <div id="profileUsername" class="profile-username">-</div>
+                                        <div id="profileFlags" class="profile-flags"></div>
+                                    </div>
+                                </div>
+
+                                <div class="meta">
+                                    <div class="meta-row"><span class="meta-label">user id</span><span id="profileId">-</span></div>
+                                    <div class="meta-row"><span class="meta-label">joined</span><span id="profileCreated">-</span></div>
+                                    <div class="meta-row"><span class="meta-label">age</span><span id="profileAge">-</span></div>
+                                </div>
+
+                                <div class="desc-label">description</div>
+                                <div id="profileDesc" class="desc">-</div>
+
+                                <div class="btn-group profile-actions">
+                                    <button type="button" id="addToHitlistBtn" class="btn">ADD TO HIT LIST</button>
+                                    <button type="button" id="openProfileBtn" class="btn">OPEN PROFILE</button>
+                                    <button type="button" id="copyUsernameBtn" class="btn">COPY USERNAME</button>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Hit List Tab -->
+        <section id="hitlistTab" class="tab-content" style="display:none;">
+            <div class="wrap">
+                <header class="hero">
+                    <h1 class="glitch" data-text="Hit List">Hit List</h1>
+                </header>
+                <div class="tool">
+                    <section class="panel">
+                        <h2 class="panel-title">SAVED HITS</h2>
+                        <div style="padding:10px; display:flex; justify-content:flex-end;">
+                            <button id="refreshHitlistBtn" class="btn">REFRESH</button>
+                        </div>
+                        <div class="table-wrap">
+                            <table id="hitlistTable">
+                                <thead>
+                                    <tr>
+                                        <th>USERNAME</th>
+                                        <th>USER ID</th>
+                                        <th>CREATED</th>
+                                        <th>YEAR</th>
+                                        <th>ADDED</th>
+                                        <th>ACTION</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="hitlistBody"></tbody>
+                            </table>
+                            <div id="hitlistEmpty" class="empty">Login to view your hit list</div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </section>
+
+        <!-- Account Lookup Tab -->
+        <section id="lookupTab" class="tab-content" style="display:none;">
+            <div class="wrap">
+                <header class="hero">
+                    <h1 class="glitch" data-text="Account Lookup">Account Lookup</h1>
+                </header>
+                <div class="tool">
+                    <section class="panel">
+                        <h2 class="panel-title">SEARCH</h2>
+                        <div class="controls">
+                            <div class="field" style="flex:1; max-width:400px;">
+                                <input type="text" id="lookupInput" placeholder="Enter username or user ID..." style="padding:6px 8px; background:#000; color:#00ff41; border:1px solid #0b4d1e; font-family:inherit;">
+                            </div>
+                            <div class="field actions-field">
+                                <button type="button" id="lookupBtn" class="btn primary">LOOKUP</button>
+                            </div>
+                        </div>
+                    </section>
+                    <div id="lookupResult" style="display:none;">
+                        <section class="panel profile-panel" style="position:static;">
+                            <h2 class="panel-title">ACCOUNT INFO</h2>
+                            <div id="profile-content" style="padding:12px;">
+                                <div class="profile-top">
+                                    <div class="avatar-box">
+                                        <img id="lookupAvatar" alt="" style="width:100%;height:100%;object-fit:cover;">
+                                    </div>
+                                    <div class="profile-heading">
+                                        <div id="lookupDisplayName" class="profile-name">-</div>
+                                        <div id="lookupUsername" class="profile-username">-</div>
+                                    </div>
+                                </div>
+                                <div class="meta">
+                                    <div class="meta-row"><span class="meta-label">user id</span><span id="lookupId">-</span></div>
+                                    <div class="meta-row"><span class="meta-label">verified</span><span id="lookupVerified">-</span></div>
+                                    <div class="meta-row"><span class="meta-label">inventory</span><span id="lookupInventory">-</span></div>
+                                    <div class="meta-row"><span class="meta-label">last seen</span><span id="lookupLastSeen">-</span></div>
+                                    <div class="meta-row"><span class="meta-label">created</span><span id="lookupCreated">-</span></div>
+                                    <div class="meta-row"><span class="meta-label">banned</span><span id="lookupBanned">-</span></div>
+                                </div>
+                                <div class="desc-label">description</div>
+                                <div id="lookupDesc" class="desc">-</div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Credits Tab -->
+        <section id="creditsTab" class="tab-content" style="display:none;">
+            <div class="wrap">
+                <header class="hero">
+                    <h1 class="glitch" data-text="Credits">Credits</h1>
+                </header>
+                <div class="tool">
+                    <section class="panel">
+                        <h2 class="panel-title">CREDITS</h2>
+                        <div style="padding:20px; text-align:center; line-height:2;">
+                            <div style="color:#00ff41;">owner is kia</div>
+                            <div style="color:#00ff41;">developer dxo</div>
+                            <div style="color:#00ff41;">developer quan</div>
+                            <div style="color:#00ff41;">developer mgovv</div>
+                            <div style="color:#00ff41;">developer himgt</div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Auth Modal -->
+    <div id="authModal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.8); align-items:center; justify-content:center;">
+        <div style="background:#000; border:1px solid #00ff41; padding:20px; width:300px; position:relative;">
+            <button id="authCloseBtn" style="position:absolute; right:10px; top:10px; background:none; border:none; color:#00ff41; font-size:20px; cursor:pointer;">×</button>
+            <h2 id="authModalTitle" style="color:#00ff41; margin-bottom:15px; font-family:Consolas;">Login</h2>
+            <div style="margin-bottom:10px;">
+                <label style="color:#0a9c2e; font-size:11px;">Username</label><br>
+                <input type="text" id="authUsername" style="width:100%; padding:6px; background:#000; color:#00ff41; border:1px solid #0b4d1e; font-family:inherit;">
+            </div>
+            <div style="margin-bottom:15px;">
+                <label style="color:#0a9c2e; font-size:11px;">Password</label><br>
+                <input type="password" id="authPassword" style="width:100%; padding:6px; background:#000; color:#00ff41; border:1px solid #0b4d1e; font-family:inherit;">
+            </div>
+            <button id="authSubmitBtn" style="width:100%; padding:6px; background:#000; color:#00ff41; border:1px solid #00ff41; cursor:pointer; font-family:inherit; margin-bottom:10px;">Login</button>
+            <div style="text-align:center; font-size:11px;">
+                <span id="authSwitchText" style="color:#0a9c2e;">Don't have an account?</span>
+                <button id="authSwitchBtn" style="background:none; border:none; color:#00ff41; cursor:pointer; text-decoration:underline;">Sign Up</button>
+            </div>
+        </div>
+    </div>
+
+    <aside class="music-player" aria-label="Music player">
+        <div class="music-head">
+            <span class="disc" aria-hidden="true"></span>
+            <div class="music-title">
+                <span class="music-label">NOW PLAYING</span>
+                <span id="track-name" class="track-name">--</span>
+            </div>
+            <div class="eq" aria-hidden="true">
+                <span></span><span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="track-picker" id="track-picker"></div>
+        <div class="music-controls">
+            <button type="button" id="audio-toggle" class="audio-btn" disabled>PLAY</button>
+            <input id="audio-volume" class="audio-slider" type="range" min="0" max="100" value="35" step="1" aria-label="Volume">
+            <span id="volume-value" class="volume-value">35%</span>
+        </div>
+        <audio id="bg-audio" preload="auto" loop></audio>
+    </aside>
+
+    <script src="app.js"></script>
+</body>
+</html>
